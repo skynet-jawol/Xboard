@@ -48,13 +48,13 @@ jobs:
 
     - name: Install Backend Dependencies
       run: |
-        yarn install --prefer-offline --frozen-lockfile
+        yarn install
       if: steps.yarn-cache.outputs.cache-hit != 'true'
 
     - name: Install Frontend Dependencies
       working-directory: front-end
       run: |
-        yarn install --prefer-offline --frozen-lockfile
+        yarn install
       if: steps.yarn-cache.outputs.cache-hit != 'true'
 
     - name: Build Frontend
