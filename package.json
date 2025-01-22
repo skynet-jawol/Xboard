@@ -33,7 +33,7 @@
     "rpio-pwm": "https://github.com/itiwll/rpio-pwm.git",
     "split": "^1.0.1",
     "stream-split": "^1.1.0",
-    "uuidv4": "^6.2.13",
+    "uuid": "^9.0.1",
     "wav": "^1.0.2",
     "winston": "^3.11.0",
     "wrtc": "^0.4.7",
