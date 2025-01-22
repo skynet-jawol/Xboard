@@ -41,7 +41,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
-    - name: Install Global Dependencies
+    - name: Configure Yarn
       run: |
         npm install -g yarn
         yarn config set registry https://registry.npmmirror.com
@@ -49,16 +49,18 @@ jobs:
         yarn config set network-concurrency 1
         yarn config set strict-ssl false
         npm config set strict-ssl false
+        yarn config set retry-times 5
+        yarn config set retry-interval 5000
 
     - name: Install Backend Dependencies
       run: |
-        yarn install
+        yarn install --network-timeout 600000
       if: steps.yarn-cache.outputs.cache-hit != 'true'
 
     - name: Install Frontend Dependencies
       working-directory: front-end
       run: |
-        yarn install
+        yarn install --network-timeout 600000
       if: steps.yarn-cache.outputs.cache-hit != 'true'
 
     - name: Build Frontend
