@@ -45,6 +45,8 @@ jobs:
       run: |
         npm install -g yarn
         yarn config set network-timeout 300000
+        yarn config set strict-ssl false
+        npm config set strict-ssl false
 
     - name: Install Backend Dependencies
       run: |
