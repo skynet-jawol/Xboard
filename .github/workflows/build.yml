@@ -45,12 +45,14 @@ jobs:
       run: |
         npm install -g yarn
         yarn config set registry https://registry.npmmirror.com
-        yarn config set network-timeout 600000
+        yarn config set network-timeout 1200000
         yarn config set network-concurrency 1
         yarn config set strict-ssl false
         npm config set strict-ssl false
-        yarn config set retry-times 5
-        yarn config set retry-interval 5000
+        yarn config set retry-times 10
+        yarn config set retry-interval 10000
+        yarn config set "npmRegistryServer" "https://registry.npmmirror.com"
+        npm config set registry https://registry.npmmirror.com
 
     - name: Install Backend Dependencies
       run: |
@@ -60,7 +62,7 @@ jobs:
     - name: Install Frontend Dependencies
       working-directory: front-end
       run: |
-        yarn install --network-timeout 600000
+        yarn install --network-timeout 1200000 --prefer-offline --frozen-lockfile
       if: steps.yarn-cache.outputs.cache-hit != 'true'
 
     - name: Build Frontend
