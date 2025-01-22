@@ -32,21 +32,20 @@ jobs:
           ~/.cache/yarn
           node_modules
           front-end/node_modules
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock', '**/package.json') }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
 
-    - name: Convert npm to yarn
+    - name: Install Backend Dependencies
       run: |
         rm -f package-lock.json
-        yarn import
-
-    - name: Install Backend Dependencies
-      run: yarn install
+        yarn install --frozen-lockfile
 
     - name: Install Frontend Dependencies
       working-directory: front-end
-      run: yarn install
+      run: |
+        rm -f package-lock.json
+        yarn install --frozen-lockfile
 
     - name: Build Frontend
       working-directory: front-end
