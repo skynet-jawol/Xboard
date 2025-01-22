@@ -16,38 +16,63 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        cache: 'yarn'
 
-    - name: Cache dependencies
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Yarn dependencies
       uses: actions/cache@v3
+      id: yarn-cache
       with:
         path: |
-          **/node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          node_modules
+          front-end/node_modules
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock', 'package.json', 'front-end/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-node-
+          ${{ runner.os }}-yarn-
 
-    - name: Install Dependencies
+    - name: Install Global Dependencies
       run: |
-        npm ci
-        cd front-end
-        npm ci
+        npm install -g yarn
+        yarn config set network-timeout 300000
+        yarn config set strict-ssl false
+        npm config set strict-ssl false
+
+    - name: Install Backend Dependencies
+      run: |
+        yarn install
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
+
+    - name: Install Frontend Dependencies
+      working-directory: front-end
+      run: |
+        yarn install
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
 
     - name: Build Frontend
-      run: |
-        cd front-end
-        npm run build
+      working-directory: front-end
+      run: yarn build
+      env:
+        CI: true
 
     - name: Run Tests
-      run: npm test
+      run: yarn test
+      env:
+        CI: true
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: build
         path: front-end/build/
+        if-no-files-found: error
