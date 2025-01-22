@@ -21,29 +21,39 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
 
-    - name: Cache dependencies
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+
+    - name: Cache npm dependencies
       uses: actions/cache@v3
       with:
-        path: |
-          **/node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
 
-    - name: Install Dependencies
-      run: |
-        npm ci
-        cd front-end
-        npm ci
+    - name: Cache Yarn dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/yarn
+        key: ${{ runner.os }}-yarn-${{ hashFiles('front-end/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Install Backend Dependencies
+      run: npm ci
+
+    - name: Install Frontend Dependencies
+      working-directory: front-end
+      run: yarn install --frozen-lockfile
 
     - name: Build Frontend
-      run: |
-        cd front-end
-        npm run build
+      working-directory: front-end
+      run: yarn build
 
-    - name: Run Tests
+    - name: Run Backend Tests
       run: npm test
 
     - name: Upload Build Artifacts
