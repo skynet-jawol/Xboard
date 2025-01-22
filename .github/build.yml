@@ -21,30 +21,38 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
 
-    - name: Cache dependencies
+    - name: Install Yarn
+      run: npm install -g yarn
+
+    - name: Cache Yarn dependencies
       uses: actions/cache@v3
       with:
         path: |
-          **/node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          ~/.cache/yarn
+          node_modules
+          front-end/node_modules
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-node-
+          ${{ runner.os }}-yarn-
 
-    - name: Install Dependencies
+    - name: Install Backend Dependencies
       run: |
-        npm ci
-        cd front-end
-        npm ci
+        rm -f package-lock.json
+        yarn install --frozen-lockfile
+
+    - name: Install Frontend Dependencies
+      working-directory: front-end
+      run: |
+        rm -f package-lock.json
+        yarn install --frozen-lockfile
 
     - name: Build Frontend
-      run: |
-        cd front-end
-        npm run build
+      working-directory: front-end
+      run: yarn build
 
-    - name: Run Tests
-      run: npm test
+    - name: Run Backend Tests
+      run: yarn test
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v3
