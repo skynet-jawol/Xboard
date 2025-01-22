@@ -1,0 +1,19 @@
+{
+  "name": "broadway",
+  "version": "1.0.0",
+  "description": "Broadway.js =========== A JavaScript H.264 decoder.",
+  "main": "Player/Player.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itiwll/Broadway.git"
+  },
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/itiwll/Broadway/issues"
+  },
+  "homepage": "https://github.com/itiwll/Broadway#readme"
+}
