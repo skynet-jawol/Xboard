@@ -1,0 +1,46 @@
+{
+  "name": "network-rc",
+  "version": "2.7.2",
+  "description": "网络控制遥控车",
+  "main": "index.js",
+  "repository": "git@github.com:esonwong/network-rc.git",
+  "author": "Eson Wong <itiwll@gmail.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "nodemon --inspect index.js --lp=8888 --subDomain=dev",
+    "server": "node index.js",
+    "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r assets network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@clusterws/cws": "^3.0.0",
+    "ads1115": "^1.2.0",
+    "body-parser": "^1.20.2",
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "i2c-bus": "^5.2.2",
+    "js-yaml": "^4.1.0",
+    "md5": "^2.3.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.33.1",
+    "moment": "^2.29.4",
+    "multer": "^1.4.5-lts.1",
+    "pulseaudio2": "^0.5.2",
+    "qrcode": "^1.5.3",
+    "rpio": "^2.4.2",
+    "rpio-pwm": "https://github.com/itiwll/rpio-pwm.git",
+    "split": "^1.0.1",
+    "stream-split": "^1.1.0",
+    "uuidv4": "^6.2.13",
+    "wav": "^1.0.2",
+    "winston": "^3.11.0",
+    "wrtc": "^0.4.7",
+    "xf-tts-socket": "^1.2.2",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
