@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Switch, Button, Tag } from "antd";
-import { Link } from "@reach/router";
+import { Link } from "react-router-dom";
 import {
   SettingOutlined,
   FullscreenOutlined,
@@ -180,15 +180,15 @@ export default function Status({
 
       {wsConnected &&
         isLogin &&
-        Object.keys(statusInfo).map((key) => {
-          const { color, label, value } = statusInfo[key];
-          return !["gps"].includes(label) ? (
+        Object.entries(statusInfo)
+          .filter(([_, { label }]) => label !== "gps")
+          .map(([key, { color, label, value }]) => (
             <Form.Item key={key}>
               <Tag color={color}>
                 {label}:{value}
               </Tag>
             </Form.Item>
-          ) : undefined;
+          ))
         })}
 
       {wsConnected && sharedEndTime && (

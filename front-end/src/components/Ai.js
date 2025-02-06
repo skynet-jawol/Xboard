@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Menu, Spin } from "antd";
-import { Router, Link, Match } from "@reach/router";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import AiDrive from "./AiDrive";
 import AiSample from "./AiSample";
 import AiTrain from "./AiTrain";
@@ -50,39 +50,17 @@ export default class AiView extends Component {
 
     return (
       <Spin spinning={loading} tip={loading}>
-        <Match path=":current">
-          {(props) => (
-            <Menu
-              selectedKeys={[props.match && props.match.current]}
-              mode="horizontal"
-            >
-              {menu.map((i) => menuItem(i))}
-            </Menu>
-          )}
-        </Match>
-        <Router>
-          <AiSample
-            path="sample"
-            onFinish={(sampleList) => this.setState({ sampleList })}
-            sampleList={sampleList}
-            canvasRef={canvasRef}
-            cameraEnabled={cameraEnabled}
-            controller={controller}
-          />
-          <AiTrain
-            path="train"
-            sampleList={sampleList}
-            controller={controller}
-            ai={ai}
-          />
-          <AiDrive
-            path="drive"
-            controller={controller}
-            canvasRef={canvasRef}
-            cameraEnabled={cameraEnabled}
-            ai={ai}
-          />
-        </Router>
+        <Menu
+          selectedKeys={[location.pathname.split('/').pop()]}
+          mode="horizontal"
+        >
+          {menu.map((i) => menuItem(i))}
+        </Menu>
+        <Routes>
+          <Route path="sample" element={<AiSample onFinish={(sampleList) => this.setState({ sampleList })} sampleList={sampleList} canvasRef={canvasRef} cameraEnabled={cameraEnabled} controller={controller} />} />
+          <Route path="train" element={<AiTrain sampleList={sampleList} controller={controller} ai={ai} />} />
+          <Route path="drive" element={<AiDrive controller={controller} canvasRef={canvasRef} cameraEnabled={cameraEnabled} ai={ai} />} />
+        </Routes>
       </Spin>
     );
   }

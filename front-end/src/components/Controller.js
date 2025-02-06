@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import Keybord from "./Keyboard";
 import Ai from "./Ai";
-import { Router } from "@reach/router";
+import { Routes, Route } from "react-router-dom";
 import ObjectDetection from "./ObjectDetection";
 import { createRef } from "react";
 import Microphone from "./Microphone";
@@ -100,22 +100,26 @@ export default class Controller extends Component {
 
     return (
       <div className="controller">
-        <Router className="controller-router">
-          <Ai
+        <Routes className="controller-router">
+          <Route
             path="ai/learn/*"
-            canvasRef={videoEl}
-            cameraEnabled={cameraEnabled}
-            action={action}
-            onAi={(isAiControlling) => this.setState({ isAiControlling })}
+            element={<Ai
+              canvasRef={videoEl}
+              cameraEnabled={cameraEnabled}
+              action={action}
+              onAi={(isAiControlling) => this.setState({ isAiControlling })}
+            />}
           />
-          <ObjectDetection
+          <Route
             path="ai/coco-ssd/*"
-            videoEl={videoEl}
-            cameraEnabled={cameraEnabled}
-            action={action}
-            onAi={(isAiControlling) => this.setState({ isAiControlling })}
+            element={<ObjectDetection
+              videoEl={videoEl}
+              cameraEnabled={cameraEnabled}
+              action={action}
+              onAi={(isAiControlling) => this.setState({ isAiControlling })}
+            />}
           />
-        </Router>
+        </Routes>
         {!isFullscreen && (
           <Form className="controller-form" size="small" layout="inline">
             <Form.Item>

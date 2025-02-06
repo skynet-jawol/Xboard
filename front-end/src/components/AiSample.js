@@ -10,7 +10,7 @@ import {
   CloseOutlined,
 } from "@ant-design/icons";
 import { Form, Button, List, Card, Upload } from "antd";
-import { Link } from "@reach/router";
+import { Link } from "react-router-dom";
 import { getImageUrl } from "../unit";
 import { saveAs } from "file-saver";
 

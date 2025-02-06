@@ -1,7 +1,7 @@
 import React, { Component, createRef } from "react";
 import { Form, Button, Spin, InputNumber, Select, message } from "antd";
 import { layout, tailLayout } from "../unit";
-import { Link } from "@reach/router";
+import { Link } from "react-router-dom";
 import { ExportOutlined, ReadOutlined } from "@ant-design/icons";
 import { aiAction } from "./AiSample";
 
