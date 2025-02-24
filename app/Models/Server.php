@@ -18,12 +18,116 @@ class Server extends Model
     public const TYPE_VMESS = 'vmess';
     public const TYPE_TUIC = 'tuic';
     public const TYPE_SHADOWSOCKS = 'shadowsocks';
+    public const TYPE_3X_UI = '3x-ui';
 
-    public const STATUS_OFFLINE = 0;
-    public const STATUS_ONLINE_NO_PUSH = 1;
-    public const STATUS_ONLINE = 2;
+    public const TYPE_ALIASES = [
+        'v2ray' => self::TYPE_VMESS,
+        'hysteria2' => self::TYPE_HYSTERIA,
+        '3xui' => self::TYPE_3X_UI
+    ];
 
-    public const CHECK_INTERVAL = 300; // 5 minutes in seconds
+    public const VALID_TYPES = [
+        self::TYPE_HYSTERIA,
+        self::TYPE_VLESS,
+        self::TYPE_TROJAN,
+        self::TYPE_VMESS,
+        self::TYPE_TUIC,
+        self::TYPE_SHADOWSOCKS,
+        self::TYPE_3X_UI
+    ];
+
+    private const PROTOCOL_CONFIGURATIONS = [
+        self::TYPE_TROJAN => [
+            'allow_insecure' => ['type' => 'boolean', 'default' => false],
+            'server_name' => ['type' => 'string', 'default' => null],
+            'network' => ['type' => 'string', 'default' => null],
+            'network_settings' => ['type' => 'array', 'default' => null]
+        ],
+        self::TYPE_VMESS => [
+            'tls' => ['type' => 'integer', 'default' => 0],
+            'network' => ['type' => 'string', 'default' => null],
+            'rules' => ['type' => 'array', 'default' => null],
+            'network_settings' => ['type' => 'array', 'default' => null],
+            'tls_settings' => ['type' => 'array', 'default' => null]
+        ],
+        self::TYPE_VLESS => [
+            'tls' => ['type' => 'integer', 'default' => 0],
+            'tls_settings' => ['type' => 'array', 'default' => null],
+            'flow' => ['type' => 'string', 'default' => null],
+            'network' => ['type' => 'string', 'default' => null],
+            'network_settings' => ['type' => 'array', 'default' => null],
+            'reality_settings' => [
+                'type' => 'object',
+                'fields' => [
+                    'allow_insecure' => ['type' => 'boolean', 'default' => false],
+                    'server_port' => ['type' => 'string', 'default' => null],
+                    'server_name' => ['type' => 'string', 'default' => null],
+                    'public_key' => ['type' => 'string', 'default' => null],
+                    'private_key' => ['type' => 'string', 'default' => null],
+                    'short_id' => ['type' => 'string', 'default' => null]
+                ]
+            ]
+        ],
+        self::TYPE_SHADOWSOCKS => [
+            'cipher' => ['type' => 'string', 'default' => null],
+            'obfs' => ['type' => 'string', 'default' => null],
+            'obfs_settings' => ['type' => 'array', 'default' => null]
+        ],
+        self::TYPE_HYSTERIA => [
+            'version' => ['type' => 'integer', 'default' => 2],
+            'bandwidth' => [
+                'type' => 'object',
+                'fields' => [
+                    'up' => ['type' => 'integer', 'default' => null],
+                    'down' => ['type' => 'integer', 'default' => null]
+                ]
+            ],
+            'obfs' => [
+                'type' => 'object',
+                'fields' => [
+                    'open' => ['type' => 'boolean', 'default' => false],
+                    'type' => ['type' => 'string', 'default' => 'salamander'],
+                    'password' => ['type' => 'string', 'default' => null]
+                ]
+            ],
+            'tls' => [
+                'type' => 'object',
+                'fields' => [
+                    'server_name' => ['type' => 'string', 'default' => null],
+                    'allow_insecure' => ['type' => 'boolean', 'default' => false]
+                ]
+            ]
+        ],
+        self::TYPE_TUIC => [
+            'version' => ['type' => 'integer', 'default' => 5],
+            'congestion_control' => ['type' => 'string', 'default' => 'cubic'],
+            'alpn' => ['type' => 'array', 'default' => ['h3']],
+            'udp_relay_mode' => ['type' => 'string', 'default' => 'native'],
+            'tls' => [
+                'type' => 'object',
+                'fields' => [
+                    'server_name' => ['type' => 'string', 'default' => null],
+                    'allow_insecure' => ['type' => 'boolean', 'default' => false]
+                ]
+            ]
+        ],
+        self::TYPE_3X_UI => [
+            'api_host' => ['type' => 'string', 'default' => null],
+            'api_key' => ['type' => 'string', 'default' => null],
+            'sync_interval' => ['type' => 'integer', 'default' => 300],
+            'load_balance' => ['type' => 'object', 'fields' => [
+                'enabled' => ['type' => 'boolean', 'default' => false],
+                'method' => ['type' => 'string', 'default' => 'round-robin'],
+                'weight' => ['type' => 'integer', 'default' => 1]
+            ]],
+            'health_check' => ['type' => 'object', 'fields' => [
+                'enabled' => ['type' => 'boolean', 'default' => true],
+                'interval' => ['type' => 'integer', 'default' => 60],
+                'timeout' => ['type' => 'integer', 'default' => 3],
+                'threshold' => ['type' => 'integer', 'default' => 3]
+            ]]
+        ]
+    ];
 
     private const CIPHER_CONFIGURATIONS = [
         '2022-blake3-aes-128-gcm' => [

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Server;
 use App\Models\User;
 use App\Utils\CacheKey;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -12,6 +13,69 @@ class NodeManagerService
 {
     private NodeGrpcClient $client;
     
+    public function __construct(NodeGrpcClient $client)
+    {
+        $this->client = $client;
+    }
+
+    /**
+     * 获取节点状态
+     *
+     * @param Server $server 服务器节点
+     * @return array|null
+     */
+    public function getNodeStatus(Server $server): ?array
+    {
+        try {
+            $response = $this->client->getNodeStatus($server->id);
+            if (!$response->success) {
+                throw new \Exception($response->message);
+            }
+            
+            return [
+                'cpu_usage' => $response->stats->cpu_usage,
+                'memory_usage' => $response->stats->memory_usage,
+                'disk_usage' => $response->stats->disk_usage,
+                'uptime' => $response->stats->uptime,
+                'load' => $response->stats->load,
+                'network' => [
+                    'in' => $response->stats->network_in,
+                    'out' => $response->stats->network_out
+                ]
+            ];
+        } catch (\Exception $e) {
+            Log::error('获取节点状态失败', [
+                'server_id' => $server->id,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * 获取节点在线用户数
+     *
+     * @param Server $server 服务器节点
+     * @return int
+     */
+    public function getOnlineUsers(Server $server): int
+    {
+        try {
+            $response = $this->client->getOnlineUsers($server->id);
+            if (!$response->success) {
+                throw new \Exception($response->message);
+            }
+            
+            return $response->count;
+        } catch (\Exception $e) {
+            Log::error('获取在线用户数失败', [
+                'server_id' => $server->id,
+                'error' => $e->getMessage()
+            ]);
+            return 0;
+        }
+    }
+
     /**
      * 同步用户配置到节点
      *

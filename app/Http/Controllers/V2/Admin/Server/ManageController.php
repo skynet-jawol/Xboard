@@ -8,19 +8,68 @@ use App\Http\Requests\Admin\ServerSave;
 use App\Models\Server;
 use App\Models\ServerGroup;
 use App\Services\ServerService;
+use App\Services\NodeManagerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ManageController extends Controller
 {
+    protected $nodeManagerService;
+
+    public function __construct(NodeManagerService $nodeManagerService)
+    {
+        $this->nodeManagerService = $nodeManagerService;
+    }
+
     public function getNodes(Request $request)
     {
         $servers = collect(ServerService::getAllServers())->map(function ($item) {
             $item['groups'] = ServerGroup::whereIn('id', $item['group_ids'])->get(['name', 'id']);
             $item['parent'] = $item->parent;
+            $item['status'] = $this->nodeManagerService->getNodeStatus($item);
+            $item['online_users'] = $this->nodeManagerService->getOnlineUsers($item);
             return $item;
         });
         return $this->success($servers);
+    }
+
+    public function batchOperation(Request $request)
+    {
+        $params = $request->validate([
+            'ids' => 'required|array',
+            'action' => 'required|string',
+            'value' => 'required'
+        ]);
+
+        try {
+            DB::beginTransaction();
+            $servers = Server::whereIn('id', $params['ids']);
+            
+            switch ($params['action']) {
+                case 'show':
+                    $servers->update(['show' => (bool)$params['value']]);
+                    break;
+                case 'group':
+                    $servers->each(function ($server) use ($params) {
+                        $groupIds = $server->group_ids;
+                        if ((bool)$params['value']) {
+                            $groupIds[] = (int)$params['group_id'];
+                        } else {
+                            $groupIds = array_diff($groupIds, [(int)$params['group_id']]);
+                        }
+                        $server->update(['group_ids' => array_values(array_unique($groupIds))]);
+                    });
+                    break;
+                default:
+                    throw new ApiException('不支持的操作类型');
+            }
+            DB::commit();
+            return $this->success(true);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error($e);
+            return $this->fail([500, '操作失败：' . $e->getMessage()]);
+        }
     }
 
     public function sort(Request $request)
@@ -43,7 +92,6 @@ class ManageController extends Controller
             DB::rollBack();
             \Log::error($e);
             return $this->fail([500, '保存失败']);
-
         }
         return $this->success(true);
     }
