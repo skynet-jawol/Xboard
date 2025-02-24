@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package node_manager;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// 节点管理服务
+service NodeManager {
+  // 用户管理
+  rpc SyncUsers(SyncUsersRequest) returns (SyncUsersResponse) {
+    option (google.api.http) = {
+      post: "/v1/nodes/{node_id}/users/sync"
+      body: "*"
+    };
+  }
+  
+  rpc GetUserTraffic(GetUserTrafficRequest) returns (GetUserTrafficResponse) {
+    option (google.api.http) = {
+      get: "/v1/nodes/{node_id}/users/{user_id}/traffic"
+    };
+  }
+  
+  // 节点管理
+  rpc GetNodeStatus(GetNodeStatusRequest) returns (GetNodeStatusResponse) {
+    option (google.api.http) = {
+      get: "/v1/nodes/{node_id}/status"
+    };
+  }
+  
+  rpc UpdateNodeConfig(UpdateNodeConfigRequest) returns (UpdateNodeConfigResponse) {
+    option (google.api.http) = {
+      put: "/v1/nodes/{node_id}/config"
+      body: "*"
+    };
+  }
+  
+  // 状态监控
+  rpc GetSystemStats(GetSystemStatsRequest) returns (GetSystemStatsResponse) {
+    option (google.api.http) = {
+      get: "/v1/nodes/{node_id}/stats"
+    };
+  }
+}
+
+// 用户同步相关消息
+message User {
+  int64 id = 1;
+  string email = 2;
+  string uuid = 3;
+  int64 speed_limit = 4;
+  int32 device_limit = 5;
+  bool enable = 6;
+}
+
+message SyncUsersRequest {
+  string node_id = 1;
+  repeated User users = 2;
+}
+
+message SyncUsersResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 流量统计相关消息
+message GetUserTrafficRequest {
+  string node_id = 1;
+  int64 user_id = 2;
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
+}
+
+message TrafficStats {
+  uint64 upload = 1;
+  uint64 download = 2;
+  repeated ConnectionInfo connections = 3;
+}
+
+message ConnectionInfo {
+  string source_ip = 1;
+  int32 source_port = 2;
+  string dest_ip = 3;
+  int32 dest_port = 4;
+  string protocol = 5;
+  google.protobuf.Timestamp start_time = 6;
+}
+
+message GetUserTrafficResponse {
+  bool success = 1;
+  string message = 2;
+  TrafficStats stats = 3;
+}
+
+// 节点状态相关消息
+message GetNodeStatusRequest {
+  string node_id = 1;
+}
+
+message SystemLoad {
+  double cpu_usage = 1;
+  double memory_usage = 2;
+  double disk_usage = 3;
+  repeated double load_averages = 4;
+}
+
+message GetNodeStatusResponse {
+  bool success = 1;
+  string message = 2;
+  SystemLoad system_load = 3;
+  string xray_version = 4;
+  string xray_status = 5;
+}
+
+// 节点配置相关消息
+message UpdateNodeConfigRequest {
+  string node_id = 1;
+  map<string, string> config = 2;
+}
+
+message UpdateNodeConfigResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 系统状态相关消息
+message GetSystemStatsRequest {
+  string node_id = 1;
+}
+
+message GetSystemStatsResponse {
+  bool success = 1;
+  string message = 2;
+  SystemLoad system_load = 3;
+  map<string, string> extra_info = 4;
+}
