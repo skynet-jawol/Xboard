@@ -36,6 +36,10 @@ check_system() {
     if ! command -v docker &> /dev/null; then
         error "未检测到Docker，开始安装Docker..."
         curl -fsSL https://get.docker.com | sh
+        if [ $? -ne 0 ]; then
+            error "Docker安装失败，请检查网络连接或手动安装Docker"
+            exit 1
+        fi
         systemctl enable docker
         systemctl start docker
     else
@@ -48,6 +52,10 @@ check_system() {
         DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
         mkdir -p $DOCKER_CONFIG/cli-plugins
         curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o $DOCKER_CONFIG/cli-plugins/docker-compose
+        if [ $? -ne 0 ]; then
+            error "Docker Compose安装失败，请检查网络连接或手动安装Docker Compose"
+            exit 1
+        fi
         chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
     else
         info "Docker Compose已安装"
@@ -61,7 +69,11 @@ download_xboard() {
         warn "Xboard目录已存在，将被删除"
         rm -rf Xboard
     fi
-    git clone -b compose --depth 1 https://github.com/cedar2025/Xboard
+    git clone -b compose --depth 1 https://github.com/skynet-jawol/Xboard.git
+    if [ $? -ne 0 ]; then
+        error "Xboard下载失败，请检查网络连接或Git配置"
+        exit 1
+    fi
     cd Xboard || exit
 }
 
