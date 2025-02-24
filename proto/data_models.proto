@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package xboard.models;
+
+import "google/protobuf/timestamp.proto";
+
+// 节点状态信息
+message NodeStatus {
+  string node_id = 1;                // 节点唯一标识
+  string status = 2;                 // 运行状态：running|stopped|error
+  float cpu_usage = 3;              // CPU 使用率 (0-100)
+  float memory_usage = 4;           // 内存使用率 (0-100)
+  float network_in = 5;             // 入站流量 (bytes)
+  float network_out = 6;            // 出站流量 (bytes)
+  int32 online_users = 7;           // 在线用户数
+  string version = 8;               // 节点版本号
+  google.protobuf.Timestamp last_heartbeat = 9;  // 最后心跳时间
+}
+
+// 用户信息
+message UserInfo {
+  string user_id = 1;               // 用户唯一标识
+  string email = 2;                 // 用户邮箱
+  string uuid = 3;                  // 用户 UUID
+  int64 quota = 4;                  // 流量配额 (bytes)
+  int64 used_quota = 5;             // 已用流量 (bytes)
+  int64 expire_time = 6;            // 过期时间戳
+  repeated string allowed_protocols = 7;  // 允许的协议类型
+  map<string, string> settings = 8;  // 用户自定义设置
+}
+
+// 配额信息
+message QuotaInfo {
+  string user_id = 1;               // 用户唯一标识
+  int64 quota = 2;                  // 新的流量配额
+  bool reset_used = 3;              // 是否重置已用流量
+  string quota_type = 4;            // 配额类型：monthly|total
+}
+
+// 流量统计
+message TrafficStats {
+  string node_id = 1;               // 节点唯一标识
+  repeated UserTraffic users = 2;    // 用户流量统计
+  google.protobuf.Timestamp start_time = 3;  // 统计开始时间
+  google.protobuf.Timestamp end_time = 4;    // 统计结束时间
+}
+
+// 用户流量统计
+message UserTraffic {
+  string user_id = 1;               // 用户唯一标识
+  int64 upload = 2;                 // 上传流量 (bytes)
+  int64 download = 3;               // 下载流量 (bytes)
+  repeated ConnectionInfo connections = 4;  // 连接信息
+}
+
+// 连接信息
+message ConnectionInfo {
+  string source_ip = 1;             // 源 IP
+  int32 source_port = 2;            // 源端口
+  string dest_ip = 3;               // 目标 IP
+  int32 dest_port = 4;              // 目标端口
+  string protocol = 5;              // 协议类型
+  google.protobuf.Timestamp start_time = 6;  // 连接开始时间
+  int64 bytes_transferred = 7;      // 传输字节数
+}
